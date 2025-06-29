@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>既存建造物のための低コスト3Dモデリング技術ガイド</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Stone, Teal, White) -->
+    <!-- Application Structure Plan: A single-page dashboard design with a fixed sidebar navigation for seamless scrolling between thematic sections. This structure was chosen to provide a clear overview of all available topics (modeling techniques, comparison, tools, case studies) at a glance, allowing users to jump to any section of interest without losing context. The core interactions focus on filtering and comparison: users can interact with a radar chart to compare methodologies and filter a comprehensive list of tools and services. This non-linear, exploratory approach is more user-friendly and effective for understanding complex, interconnected information than a static, linear report. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Comparing modeling techniques (cost, accuracy, speed, skill). Goal: Compare. Viz: Interactive Radar Chart (Chart.js). Interaction: Toggling datasets (techniques) on/off. Justification: A radar chart provides an excellent multi-variate comparison at a glance. Interaction allows users to focus on specific comparisons.
+        - Report Info: Listing available tools, hardware, and services. Goal: Inform/Organize. Viz: Filterable Card Grid (HTML/CSS/JS). Interaction: Clicking category buttons to filter the grid. Justification: Cards allow for richer content presentation than a table row. Filtering makes it easy for users to find relevant solutions quickly.
+        - Report Info: Explaining workflows (e.g., photogrammetry). Goal: Organize/Inform. Viz: Styled HTML/CSS Flexbox diagram. Interaction: Hover effects on steps. Justification: A visual flow diagram is more intuitive than a text list for explaining a process. Using HTML/CSS avoids external graphics and keeps the app self-contained.
+        - Report Info: Case studies. Goal: Inform. Viz: Card layout. Interaction: None, simple display. Justification: Clear and concise presentation of real-world examples.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .nav-link.active {
+            color: #0d9488; /* teal-600 */
+            background-color: #f0fdfa; /* teal-50 */
+            border-left-color: #0d9488; /* teal-600 */
+        }
+        .section-title::before {
+            content: '■';
+            color: #14b8a6; /* teal-500 */
+            margin-right: 0.75rem;
+        }
+        .flow-step {
+            transition: all 0.2s ease-in-out;
+        }
+        .flow-step:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .tool-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="w-full md:w-64 bg-white border-b md:border-r border-stone-200 sticky top-0 z-20 md:h-screen">
+            <div class="p-6">
+                <h1 class="text-xl font-bold text-teal-700">3Dモデリングガイド</h1>
+                <p class="text-sm text-stone-500 mt-1">既存建造物のための技術</p>
+            </div>
+            <nav id="navigation" class="flex flex-row md:flex-col p-3 md:space-y-2 overflow-x-auto">
+                <a href="#introduction" class="nav-link font-medium px-4 py-2 rounded-md text-stone-600 hover:bg-stone-50 hover:text-teal-600 whitespace-nowrap">はじめに</a>
+                <a href="#techniques" class="nav-link font-medium px-4 py-2 rounded-md text-stone-600 hover:bg-stone-50 hover:text-teal-600 whitespace-nowrap">主要な3D化手法</a>
+                <a href="#comparison" class="nav-link font-medium px-4 py-2 rounded-md text-stone-600 hover:bg-stone-50 hover:text-teal-600 whitespace-nowrap">手法の比較</a>
+                <a href="#tools" class="nav-link font-medium px-4 py-2 rounded-md text-stone-600 hover:bg-stone-50 hover:text-teal-600 whitespace-nowrap">ツール & サービス</a>
+                <a href="#terrain" class="nav-link font-medium px-4 py-2 rounded-md text-stone-600 hover:bg-stone-50 hover:text-teal-600 whitespace-nowrap">地形の3Dモデル化</a>
+                <a href="#casestudies" class="nav-link font-medium px-4 py-2 rounded-md text-stone-600 hover:bg-stone-50 hover:text-teal-600 whitespace-nowrap">成功事例と課題</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-stone-100">
+            <div id="content-container" class="max-w-5xl mx-auto space-y-16">
+
+                <!-- Section 1: Introduction -->
+                <section id="introduction">
+                    <h2 class="text-3xl font-bold text-stone-800 mb-4 section-title">はじめに：未来の礎を、現在から築く</h2>
+                    <p class="text-lg text-stone-600 leading-relaxed mb-6">
+                        社会インフラの老朽化、災害リスクの増大、そして熟練技術者の減少。これらの課題に直面する現代において、既存の建造物や地形をデジタルデータとして正確に把握し、活用する「デジタルツイン」の重要性が高まっています。特に、CADデータが存在しない無数の建造物をいかに低コストで効率的に3Dモデル化するかは、喫緊の課題です。
+                    </p>
+                    <p class="text-stone-600 leading-relaxed">
+                        このインタラクティブガイドは、その課題解決の一助となることを目指しています。フォトグラメトリや3Dレーザースキャンといった主要な技術から、具体的なツール、成功事例までを網羅的に解説します。各セクションを自由に探索し、皆様のプロジェクトに最適な手法を見つけるための洞察を得てください。
+                    </p>
+                </section>
+
+                <!-- Section 2: Techniques -->
+                <section id="techniques">
+                    <h2 class="text-3xl font-bold text-stone-800 mb-4 section-title">主要な3D化手法</h2>
+                    <p class="text-stone-600 leading-relaxed mb-8">
+                        既存建造物の3Dモデルを作成するには、対象物の状態や必要な精度、予算に応じて様々なアプローチが存在します。ここでは、代表的な3つの手法を紹介します。それぞれの特徴を理解し、プロジェクトの目的に合った手法を選択することが重要です。
+                    </p>
+                    <div id="techniques-container" class="space-y-12"></div>
+                </section>
+
+                <!-- Section 3: Comparison -->
+                <section id="comparison">
+                    <h2 class="text-3xl font-bold text-stone-800 mb-4 section-title">手法の比較評価</h2>
+                     <p class="text-stone-600 leading-relaxed mb-6">
+                        どの手法が最適かは、プロジェクトの要件によって異なります。「コスト」「精度」「速度」「要求スキル」の4つの観点から各手法を比較してみましょう。下のグラフは、各手法の特性を視覚的に示したものです。凡例をクリックすることで、グラフ上の表示/非表示を切り替えられます。
+                    </p>
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <div class="chart-container">
+                            <canvas id="comparisonChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 4: Tools & Services -->
+                <section id="tools">
+                    <h2 class="text-3xl font-bold text-stone-800 mb-4 section-title">ツール & サービス</h2>
+                    <p class="text-stone-600 leading-relaxed mb-6">
+                        3Dモデル作成を実現するためには、様々なソフトウェア、ハードウェア、専門サービスが存在します。ここでは、各手法に対応する代表的な選択肢を紹介します。下のボタンでカテゴリを絞り込み、目的のツールを探してみてください。
+                    </p>
+                    <div id="tools-filter" class="flex flex-wrap gap-2 mb-6"></div>
+                    <div id="tools-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                </section>
+
+                <!-- Section 5: Terrain Modeling -->
+                <section id="terrain">
+                    <h2 class="text-3xl font-bold text-stone-800 mb-4 section-title">地形の3Dモデル化</h2>
+                    <p class="text-stone-600 leading-relaxed mb-6">
+                        建造物だけでなく、その周辺の地形を3Dモデル化することも、都市計画や防災シミュレーションにおいて不可欠です。主に航空機やドローン、衛星から得られる標高データ（DEM/DSM）を利用します。
+                    </p>
+                    <div class="bg-white p-8 rounded-xl shadow-lg space-y-6">
+                        <div>
+                            <h3 class="font-bold text-xl text-teal-700 mb-2">主な手法とデータソース</h3>
+                            <ul class="list-disc list-inside space-y-2 text-stone-600">
+                                <li><strong>ドローン/UAV測量:</strong> 特定エリアを高精細にマッピング。フォトグラメトリ技術で点群データと3Dメッシュを生成。小～中規模のエリアに最適。</li>
+                                <li><strong>航空レーザー測量:</strong> 航空機からレーザーを照射し、広範囲の地形データを高精度に取得。国や自治体による整備が進んでいる。</li>
+                                <li><strong>国土地理院の基盤地図情報:</strong> 日本全国をカバーする基本的な標高データ（DEM）を無償で利用可能。広域の概観把握に適している。</li>
+                            </ul>
+                        </div>
+                         <div>
+                            <h3 class="font-bold text-xl text-teal-700 mb-2">活用されるソフトウェア</h3>
+                            <p class="text-stone-600">GIS（地理情報システム）ソフトウェア（例: <span class="font-semibold">QGIS</span>, <span class="font-semibold">ArcGIS</span>）や、点群処理ソフトウェア（例: <span class="font-semibold">ReCap</span>, <span class="font-semibold">CloudCompare</span>）が地形データの処理と3Dモデル化に用いられます。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 6: Case Studies -->
+                <section id="casestudies">
+                    <h2 class="text-3xl font-bold text-stone-800 mb-4 section-title">成功事例と課題</h2>
+                     <p class="text-stone-600 leading-relaxed mb-8">
+                        理論だけでなく、実際のプロジェクトでどのように技術が活用され、どのような成果と課題があったのかを見ていきましょう。ここではインフラ分野における代表的な事例を紹介します。
+                    </p>
+                    <div id="casestudies-container" class="space-y-8"></div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Data ---
+            const techniquesData = [
+                {
+                    id: 'photogrammetry',
+                    name: '① フォトグラメトリ（写真測量）',
+                    description: '複数の角度から撮影した多数の写真を用いて、対象物の3次元形状とテクスチャを復元する技術です。スマートフォンやドローンで手軽に始められるため、低コストでの3D化に適しています。',
+                    details: [
+                        { title: 'コスト', text: '非常に低い。専用カメラが不要で、無料のソフトウェアも存在する。', icon: '💰' },
+                        { title: '精度', text: '撮影条件や写真の枚数、品質に大きく依存する。中～高精度が可能。', icon: '🎯' },
+                        { title: '適用場面', text: '建物の外観、文化財の記録、小規模な構造物など。', icon: '🏢' },
+                    ],
+                    workflow: ['計画・撮影', '写真のアライメント', '高密度点群生成', 'メッシュ・テクスチャ生成', '3Dモデル完成']
+                },
+                {
+                    id: 'laser-scanning',
+                    name: '② 3Dレーザースキャン',
+                    description: '対象物にレーザーを照射し、その反射光が返ってくるまでの時間から距離を測定し、膨大な数の3次元座標（点群）を取得する技術です。非常に高精度な測定が可能ですが、機材が高価です。',
+                    details: [
+                        { title: 'コスト', text: '高い。スキャナ本体が数百万円以上。計測サービスを利用するのが一般的。', icon: '💸' },
+                        { title: '精度', text: '非常に高い。ミリ単位での計測が可能で、寸法精度が求められる場合に最適。', icon: '📏' },
+                        { title: '適用場面', text: '大規模プラント、橋梁、トンネル、BIM用の現況データ取得など。', icon: '🌉' },
+                    ],
+                    workflow: ['スキャン計画', '現地でのスキャン', '点群データの合成', 'ノイズ除去・編集', 'モデル化（手動/半自動）']
+                },
+                {
+                    id: '2d-to-3d',
+                    name: '③ 2D設計図からの3Dモデル化',
+                    description: '既存の2Dの平面図、立面図、断面図などの設計図書を基に、BIM/CIMソフトウェア上で3Dモデルを立ち上げていく手法です。設計情報が付与された、インテリジェントなモデルを作成できます。',
+                    details: [
+                        { title: 'コスト', text: '中程度。ソフトウェア費用と、モデリングを行うオペレーターの人件費が主。', icon: '💻' },
+                        { title: '精度', text: '図面の正確性に依存する。設計意図を反映したモデルになる。', icon: '📐' },
+                        { title: '適用場面', text: '設計図書が残存している全ての建造物。維持管理や改修計画での活用。', icon: '📄' },
+                    ],
+                    workflow: ['図面のスキャン・整理', 'BIMソフトへの読込み', '通り芯・レベルの設定', '部材（壁、床、柱）の作成', '属性情報の付与']
+                }
+            ];
+
+            const toolsData = [
+                { name: 'Agisoft Metashape', category: 'フォトグラメトリ', type: 'ソフトウェア', description: 'プロフェッショナル向けのフォトグラメトリソフトウェア。高精度なモデル生成が可能。' },
+                { name: 'RealityCapture', category: 'フォトグラメトリ', type: 'ソフトウェア', description: '高速な処理が特徴のフォトグラメトリソフトウェア。大規模データにも対応。' },
+                { name: 'Pix4Dmapper', category: 'フォトグラメトリ', type: 'ソフトウェア', description: 'ドローン測量に特化。マッピングやオルソ画像生成に強み。' },
+                { name: 'Meshroom', category: 'フォトグラメトリ', type: 'ソフトウェア', description: 'オープンソースで無償利用可能なフォトグラメトリソフトウェア。' },
+                { name: 'Faro Focus', category: 'レーザースキャン', type: 'ハードウェア', description: '建設・土木分野で広く利用される地上設置型3Dレーザースキャナ。' },
+                { name: 'Leica ScanStation', category: 'レーザースキャン', type: 'ハードウェア', description: '高精度・長距離測定が可能なハイエンドモデルのレーザースキャナ。' },
+                { name: 'Autodesk ReCap', category: '点群処理', type: 'ソフトウェア', description: '点群データの合成、編集、可視化を行うソフトウェア。Autodesk製品との連携が強力。' },
+                { name: 'CloudCompare', category: '点群処理', type: 'ソフトウェア', description: 'オープンソースの高機能な点群・メッシュ処理ソフトウェア。' },
+                { name: 'Autodesk Revit', category: '2D→3D / BIM', type: 'ソフトウェア', description: '建築設計向けのBIMソフトウェア。2D図面からの3Dモデル作成、属性情報管理に優れる。' },
+                { name: 'Archicad', category: '2D→3D / BIM', type: 'ソフトウェア', description: '直感的な操作性が特徴の建築BIMソフトウェア。' },
+                { name: 'Scan-to-BIMサービス', category: 'レーザースキャン', type: 'サービス', description: '専門業者が現地でレーザースキャンを行い、BIMモデルまで作成するサービス。' },
+                { name: 'ドローン撮影サービス', category: 'フォトグラメトリ', type: 'サービス', description: 'ドローン操縦士が建物の空撮を行い、3Dモデル化用の写真データを提供する。' }
+            ];
+            
+            const caseStudiesData = [
+                {
+                    title: '橋梁の劣化状況把握と維持管理への活用',
+                    method: 'ドローンによるフォトグラメトリ',
+                    success: '従来の人による近接目視点検では困難だった橋梁全体の高精細な3Dモデルを、安全かつ短期間・低コストで作成。ひび割れ等の損傷箇所をPC上で正確に把握・計測し、補修計画の策定や、経年変化の記録に大きく貢献した。',
+                    challenge: '日照条件の変化によるテクスチャの不整合や、橋梁下部などGPSが届きにくい場所でのドローンの安定飛行。膨大な写真データから精度の高いモデルを生成するための計算リソースの確保。'
+                },
+                {
+                    title: '歴史的建造物（文化財）のデジタルアーカイブ',
+                    method: '地上レーザースキャンとフォトグラメトリの併用',
+                    success: 'レーザースキャンで正確な形状データを、フォトグラメトリで高精細な色彩・質感データを取得し、両者を統合。現実と見紛うほどの高忠実度なデジタルツインを構築し、学術研究やVRでの公開、修復・復元時の参照資料として活用されている。',
+                    challenge: '複雑な装飾や内部構造を持つ対象物の場合、スキャン漏れや写真の死角をなくすための計測計画が煩雑になる。二つの異なる手法で取得したデータの位置合わせ（レジストレーション）に高い技術が要求される。'
+                }
+            ];
+            
+            const comparisonData = {
+                labels: ['低コスト', '高精度', '高速性', '低スキル要求'],
+                datasets: [
+                    {
+                        label: 'フォトグラメトリ',
+                        data: [5, 3, 3, 4], // 1(低) ~ 5(高)
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                    },
+                    {
+                        label: '3Dレーザースキャン',
+                        data: [1, 5, 4, 2],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                    },
+                    {
+                        label: '2D図面→3Dモデル化',
+                        data: [3, 4, 2, 3],
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                    }
+                ]
+            };
+
+            // --- Render Functions ---
+            
+            function renderTechniques() {
+                const container = document.getElementById('techniques-container');
+                container.innerHTML = techniquesData.map(tech => `
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="p-6 md:p-8">
+                            <h3 class="text-2xl font-bold text-teal-700 mb-3">${tech.name}</h3>
+                            <p class="text-stone-600 leading-relaxed mb-6">${tech.description}</p>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                                ${tech.details.map(detail => `
+                                    <div class="bg-stone-50 p-4 rounded-lg">
+                                        <div class="flex items-center">
+                                            <span class="text-2xl mr-3">${detail.icon}</span>
+                                            <div>
+                                                <h4 class="font-bold text-stone-700">${detail.title}</h4>
+                                                <p class="text-sm text-stone-500">${detail.text}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <h4 class="font-bold text-lg text-stone-700 mb-4">基本的なワークフロー</h4>
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-center">
+                                ${tech.workflow.map((step, index) => `
+                                    <div class="flex-1 w-full bg-white border border-stone-200 p-3 rounded-lg shadow-sm flow-step">
+                                        <div class="text-teal-600 font-bold text-sm">${index + 1}</div>
+                                        <div class="text-stone-700 text-sm font-medium">${step}</div>
+                                    </div>
+                                    ${index < tech.workflow.length - 1 ? `<div class="text-stone-400 text-2xl hidden sm:block mx-2 font-light">&rarr;</div><div class="text-stone-400 text-2xl sm:hidden my-1">&darr;</div>` : ''}
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function renderTools() {
+                const filterContainer = document.getElementById('tools-filter');
+                const gridContainer = document.getElementById('tools-grid');
+                const categories = ['すべて', ...new Set(toolsData.map(t => t.category))];
+                
+                filterContainer.innerHTML = categories.map(cat => 
+                    `<button class="tool-filter-btn px-4 py-2 text-sm font-medium rounded-full transition-colors ${cat === 'すべて' ? 'bg-teal-600 text-white' : 'bg-white text-stone-700 hover:bg-teal-100'}" data-category="${cat}">
+                        ${cat}
+                    </button>`
+                ).join('');
+
+                renderToolCards('すべて');
+
+                document.querySelectorAll('.tool-filter-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        document.querySelectorAll('.tool-filter-btn').forEach(btn => {
+                            btn.classList.remove('bg-teal-600', 'text-white');
+                            btn.classList.add('bg-white', 'text-stone-700', 'hover:bg-teal-100');
+                        });
+                        button.classList.add('bg-teal-600', 'text-white');
+                        button.classList.remove('bg-white', 'text-stone-700', 'hover:bg-teal-100');
+                        renderToolCards(button.dataset.category);
+                    });
+                });
+            }
+
+            function renderToolCards(category) {
+                const gridContainer = document.getElementById('tools-grid');
+                const filteredTools = category === 'すべて' 
+                    ? toolsData 
+                    : toolsData.filter(tool => tool.category === category);
+
+                gridContainer.innerHTML = filteredTools.map(tool => `
+                    <div class="bg-white p-6 rounded-xl shadow-md tool-card">
+                        <h4 class="font-bold text-lg text-stone-800">${tool.name}</h4>
+                        <div class="flex items-center gap-2 my-2">
+                            <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-teal-600 bg-teal-200">${tool.category}</span>
+                            <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-stone-600 bg-stone-200">${tool.type}</span>
+                        </div>
+                        <p class="text-stone-600 text-sm mt-2">${tool.description}</p>
+                    </div>
+                `).join('');
+            }
+            
+            function renderCaseStudies() {
+                const container = document.getElementById('casestudies-container');
+                container.innerHTML = caseStudiesData.map(study => `
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="p-6 md:p-8">
+                             <h3 class="text-xl font-bold text-stone-800 mb-2">${study.title}</h3>
+                             <span class="text-sm font-semibold inline-block py-1 px-2.5 leading-none text-center whitespace-nowrap align-baseline rounded-full bg-blue-100 text-blue-700 mb-4">${study.method}</span>
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="font-bold text-lg text-green-700 mb-2">成果・成功点</h4>
+                                    <p class="text-stone-600 leading-relaxed">${study.success}</p>
+                                </div>
+                                <div>
+                                     <h4 class="font-bold text-lg text-amber-700 mb-2">課題・挑戦</h4>
+                                    <p class="text-stone-600 leading-relaxed">${study.challenge}</p>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            function renderComparisonChart() {
+                const ctx = document.getElementById('comparisonChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: comparisonData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += context.formattedValue + ' / 5';
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 5,
+                                min: 0,
+                                ticks: {
+                                    stepSize: 1,
+                                    backdropColor: 'rgba(255, 255, 255, 0.75)',
+                                    color: '#57534e'
+                                },
+                                pointLabels: {
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    },
+                                    color: '#44403c'
+                                },
+                                grid: {
+                                    color: '#e7e5e4'
+                                },
+                                angleLines: {
+                                    color: '#e7e5e4'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- Navigation Logic ---
+            function setupNavigation() {
+                const navLinks = document.querySelectorAll('.nav-link');
+                const sections = document.querySelectorAll('section');
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            navLinks.forEach(link => {
+                                link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                            });
+                        }
+                    });
+                }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 });
+
+                sections.forEach(section => observer.observe(section));
+                
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetId = link.getAttribute('href');
+                        document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+                    });
+                });
+            }
+
+
+            // --- Initial Render ---
+            renderTechniques();
+            renderComparisonChart();
+            renderTools();
+            renderCaseStudies();
+            setupNavigation();
+        });
+    </script>
+</body>
+</html>
