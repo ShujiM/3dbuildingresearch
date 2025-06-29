@@ -214,6 +214,23 @@
                             <li><span class="font-bold">手っ取り早く既存の構造物（橋やビル）を3Dモデル化するには、<span class="text-teal-700">フォトグラメトリ（写真測量）</span>が最もコストパフォーマンスに優れています。スマートフォンやデジカメ、ドローンで多角的に写真を撮影し、専用ソフトで自動的に3D化できるため、特別な機材や高額な投資が不要です。</span></li>
                             <li><span class="font-bold">2D CADデータを3D化する方法</span>は、<span class="text-teal-700">建築系の専用BIM/CADソフト</span>（例：Revit、Archicad等）が無いと現実的には難しく、手作業によるモデリングや属性付与も必要となります。</li>
                             <li><span class="font-bold">完全にAIによる自動生成だけで3Dモデルを制作することは現状では不可能</span>であり、<span class="text-teal-700">必ず人の手による作成や修正作業</span>が必要です。特に精度や用途に応じた調整が求められます。</li>
+                        </ol>
+                        <div class="mt-8">
+                            <h3 class="text-2xl font-bold text-teal-700 mb-4">生成AIによる3Dモデリング補完の現状と技術解説</h3>
+                            <p class="text-stone-700 mb-4">近年、2D CADデータや手書き図面から3DモデルをAIで自動生成・補完する技術が急速に進化しています。特に「Implicit Modeling（暗黙的モデリング）」や「Neural Radiance Fields（NeRF）」といった手法が注目されています。</p>
+                            <ul class="list-disc list-inside space-y-2 text-stone-700 mb-4">
+                                <li><span class="font-bold">Implicit Modeling（暗黙的モデリング）</span>：3D形状を数式（関数F(x,y,z)）で表現し、符号付き距離関数（SDF）などを用いて滑らかな曲面や複雑な形状を高解像度で再現できます。従来のメッシュとは異なり、トポロジーの制約が少なく、ブーリアン演算も容易です。</li>
+                                <li><span class="font-bold">Neural Radiance Fields（NeRF）</span>：ニューラルネットワークで3D空間内の各点の色や密度を学習し、複数視点の画像から高精度な3D再構築や新規視点のレンダリングを実現します。建築図面や写真からの3D化にも応用が期待されています。</li>
+                            </ul>
+                            <p class="text-stone-700 mb-4">現状では、AIは壁や床などの基本構造や定型部品（窓・ドア等）の自動生成・配置は可能ですが、複雑な形状や設計意図の完全な再現は困難です。AIが生成した初期モデルを3Dモデリングソフト（例：Blender等）で人が修正・加筆する「協調作業」が主流です。</p>
+                            <ul class="list-disc list-inside space-y-2 text-stone-700 mb-4">
+                                <li>2D CADデータ（DXF/DWG等）をAIツールに読み込ませ、壁や開口部の推定・3D化を自動化</li>
+                                <li>AIが認識できない複雑な部分やディテールは人が手動でモデリング・修正</li>
+                                <li>AIによるテクスチャやマテリアルの自動割り当ても可能だが、最終品質は手動調整が必要</li>
+                            </ul>
+                            <p class="text-stone-700">今後は、拡散モデルやNeRFなどの進化により、2D図面やテキストからの高精度な3D自動生成がさらに進むと期待されますが、現時点では「AIによる補完＋人の手による仕上げ」が現実的なワークフローです。</p>
+                        </div>
+                        <ol class="list-decimal list-inside space-y-3 text-stone-700 mt-8" start="4">
                             <li><span class="font-bold">地形データ</span>は、<span class="text-teal-700">PLATEAUデータ</span>や<span class="text-teal-700">Google Mapの地形データ</span>からも3Dモデルを生成可能です。用途や精度、利用規約に注意しながら活用しましょう。</li>
                         </ol>
                     </div>
