@@ -356,20 +356,39 @@
 
             function renderToolCards(category) {
                 const gridContainer = document.getElementById('tools-grid');
+                // ツール名とリンクの対応表
+                const toolLinks = {
+                    'Agisoft Metashape': 'https://www.agisoft.com/',
+                    'RealityCapture': 'https://www.capturingreality.com/',
+                    'Pix4Dmapper': 'https://www.pix4d.com/product/pix4dmapper-photogrammetry-software',
+                    'Meshroom': 'https://alicevision.org/#meshroom',
+                    'Faro Focus': 'https://www.faro.com/ja-jp/products/construction-bim-cim/faro-focus/',
+                    'Leica ScanStation': 'https://leica-geosystems.com/ja-jp/products/laser-scanners/scanstation',
+                    'Autodesk ReCap': 'https://www.autodesk.co.jp/products/recap/overview',
+                    'CloudCompare': 'https://www.cloudcompare.org/',
+                    'Autodesk Revit': 'https://www.autodesk.co.jp/products/revit/overview',
+                    'Archicad': 'https://graphisoft.com/jp/archicad',
+                    'Scan-to-BIMサービス': 'https://www.autodesk.co.jp/solutions/scan-to-bim',
+                    'ドローン撮影サービス': 'https://www.sorapass.com/drone-service/'
+                };
                 const filteredTools = category === 'すべて' 
                     ? toolsData 
                     : toolsData.filter(tool => tool.category === category);
 
-                gridContainer.innerHTML = filteredTools.map(tool => `
-                    <div class="bg-white p-6 rounded-xl shadow-md tool-card">
-                        <h4 class="font-bold text-lg text-stone-800">${tool.name}</h4>
-                        <div class="flex items-center gap-2 my-2">
-                            <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-teal-600 bg-teal-200">${tool.category}</span>
-                            <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-stone-600 bg-stone-200">${tool.type}</span>
-                        </div>
-                        <p class="text-stone-600 text-sm mt-2">${tool.description}</p>
-                    </div>
-                `).join('');
+                gridContainer.innerHTML = filteredTools.map(tool => {
+                    const link = toolLinks[tool.name];
+                    return (
+                        `<div class="bg-white p-6 rounded-xl shadow-md tool-card">
+                            <h4 class="font-bold text-lg text-stone-800">${tool.name}</h4>
+                            <div class="flex items-center gap-2 my-2">
+                                <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-teal-600 bg-teal-200">${tool.category}</span>
+                                <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-stone-600 bg-stone-200">${tool.type}</span>
+                            </div>
+                            <p class="text-stone-600 text-sm mt-2">${tool.description}</p>
+                            ${link ? `<a href="${link}" class="inline-block mt-4 text-teal-700 underline text-sm font-medium" target="_blank">公式サイトへ</a>` : ''}
+                        </div>`
+                    );
+                }).join('');
             }
             
             function renderCaseStudies() {
