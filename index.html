@@ -26,7 +26,7 @@
         <!-- Sidebar Navigation -->
         <aside class="w-full md:w-64 bg-white border-b md:border-r border-stone-200 sticky top-0 z-20 md:h-screen">
             <div class="p-6">
-                <h1 class="text-xl font-bold text-teal-700">3Dモデリングガイド</h1>
+                <h1 class="text-xl font-bold text-teal-700">3Dモデリング技術調査01</h1>
                 <p class="text-sm text-stone-500 mt-1">既存建造物のための技術</p>
             </div>
             <nav id="navigation" class="flex flex-row md:flex-col p-3 md:space-y-2 overflow-x-auto">
@@ -35,6 +35,7 @@
                 <a href="#nocad-bridge-3d" class="nav-link font-medium px-4 py-2 rounded-md text-stone-600 hover:bg-stone-50 hover:text-teal-600 whitespace-nowrap">非CAD橋梁の3D化</a>
                 <a href="#tools" class="nav-link font-medium px-4 py-2 rounded-md text-stone-600 hover:bg-stone-50 hover:text-teal-600 whitespace-nowrap">ツール & サービス</a>
                 <a href="#terrain" class="nav-link font-medium px-4 py-2 rounded-md text-stone-600 hover:bg-stone-50 hover:text-teal-600 whitespace-nowrap">地形の3Dモデル化</a>
+                <a href="#ai-3d" class="nav-link font-medium px-4 py-2 rounded-md text-stone-600 hover:bg-stone-50 hover:text-teal-600 whitespace-nowrap">生成AIと3Dモデリング</a>
                 <a href="#summary" class="nav-link font-medium px-4 py-2 rounded-md text-stone-600 hover:bg-stone-50 hover:text-teal-600 whitespace-nowrap">まとめ</a>
             </nav>
         </aside>
@@ -156,6 +157,25 @@
                             <p class="text-xs text-stone-500 mt-2">※Googleの利用規約や著作権に十分ご注意ください。商用利用や公開には制限があります。</p>
                         </div>
                         <!-- Google Map地形データ→Blender連携の追記ここまで -->
+                    </div>
+                </section>
+
+                <!-- Section: AIによる3Dモデリング補完の現状と技術解説 -->
+                <section id="ai-3d">
+                    <h2 class="text-3xl font-bold text-stone-800 mb-4 section-title">生成AIによる3Dモデリング補完の現状と技術解説</h2>
+                    <div class="bg-white p-8 rounded-xl shadow-lg space-y-6">
+                        <p class="text-stone-700 mb-4">近年、2D CADデータや手書き図面から3DモデルをAIで自動生成・補完する技術が急速に進化しています。特に「Implicit Modeling（暗黙的モデリング）」や「Neural Radiance Fields（NeRF）」といった手法が注目されています。</p>
+                        <ul class="list-disc list-inside space-y-2 text-stone-700 mb-4">
+                            <li><span class="font-bold">Implicit Modeling（暗黙的モデリング）</span>：3D形状を数式（関数F(x,y,z)）で表現し、符号付き距離関数（SDF）などを用いて滑らかな曲面や複雑な形状を高解像度で再現できます。従来のメッシュとは異なり、トポロジーの制約が少なく、ブーリアン演算も容易です。</li>
+                            <li><span class="font-bold">Neural Radiance Fields（NeRF）</span>：ニューラルネットワークで3D空間内の各点の色や密度を学習し、複数視点の画像から高精度な3D再構築や新規視点のレンダリングを実現します。建築図面や写真からの3D化にも応用が期待されています。</li>
+                        </ul>
+                        <p class="text-stone-700 mb-4"><span class="font-bold">現状では、AIは壁や床などの基本構造や定型部品（窓・ドア等）の自動生成・配置は可能ですが、複雑な形状や設計意図の完全な再現は困難です。AIが生成した初期モデルを3Dモデリングソフト（例：Blender等）で人が修正・加筆する「協調作業」が主流です。</span></p>
+                        <ul class="list-disc list-inside space-y-2 text-stone-700 mb-4">
+                            <li>2D CADデータ（DXF/DWG等）をAIツールに読み込ませ、壁や開口部の推定・3D化を自動化</li>
+                            <li>AIが認識できない複雑な部分やディテールは人が手動でモデリング・修正</li>
+                            <li>AIによるテクスチャやマテリアルの自動割り当ても可能だが、最終品質は手動調整が必要</li>
+                        </ul>
+                        <p class="text-stone-700">今後は、拡散モデルやNeRFなどの進化により、2D図面やテキストからの高精度な3D自動生成がさらに進むと期待されますが、現時点では「AIによる補完＋人の手による仕上げ」が現実的なワークフローです。</p>
                     </div>
                 </section>
 
